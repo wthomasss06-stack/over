@@ -1,0 +1,432 @@
+if ('scrollRestoration' in history) {
+   history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
+window.addEventListener("beforeunload", function () {
+   window.scrollTo(0, 0);
+});
+
+
+ document.fonts.ready.then(function () {
+            document.body.classList.add('fonts-loaded');
+        });
+
+        setTimeout(function () {
+            document.body.classList.add('fonts-loaded');
+        }, 3000);
+
+window.addEventListener("DOMContentLoaded", () => {
+
+   setTimeout(() => {
+      window.scrollTo(0, 0);
+   }, 10);
+
+
+   const lenis = new Lenis({
+      duration: 3,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+   })
+
+
+
+
+
+   function destroyTimeline(tl) {
+      if (!tl) return;
+      tl.kill();
+      tl.clear();
+   }
+
+   gsap.registerPlugin(ScrollTrigger)
+
+   lenis.on("scroll", ScrollTrigger.update);
+
+   gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+   });
+
+   gsap.ticker.lagSmoothing(0);
+
+   gsap.registerPlugin(SplitText, DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin);
+
+   const title1All = gsap.utils.toArray(".title-1");
+   if (title1All.length > 0) {
+      lenis.stop();
+   }
+   const imgScalingHeroContent = gsap.utils.toArray(".image-scaling-hero-content");
+   const title2 = document.querySelector(".title-2");
+   let title2Chars = null;
+   if (title2) {
+      title2Chars = new SplitText(title2, { type: "chars" }).chars;
+   }
+
+   let tl = gsap.timeline({});
+   let rl = gsap.timeline({});
+   let zl = gsap.timeline({});
+   let yl = gsap.timeline({});
+   let il = gsap.timeline({});
+   let mm = gsap.matchMedia();
+
+   const isMobile = window.innerWidth <= 800;
+ 
+   const initHeroSectionAnimation = () => {
+      if (title1All.length === 0) {
+         lenis.start();
+         return;
+      }
+      destroyTimeline(tl);
+
+      tl = gsap.timeline({
+         onComplete: () => { lenis.start(); },
+         delay: 1
+      });
+
+     title1All.forEach((title) => {
+         const line1 = title.querySelector(".line-1");
+         const line2 = title.querySelector(".line-2");
+         if (!line1) return;
+
+         const line1Chars = new SplitText(line1, { type: "chars" }).chars;
+         const line2Chars = line2 ? new SplitText(line2, { type: "chars" }).chars : [];
+         const charsToAnimate = [...(line1Chars || []), ...(line2Chars || [])];
+
+         tl.from(title, {
+             clipPath: "inset(20% 0% 20% 0%)",
+             ease: "power2.inOut",
+             transformOrigin: "40% 50%",
+             duration: isMobile ? 0.6 : 1
+         }, "<");
+
+         if (charsToAnimate.length > 0) {
+            tl.from(charsToAnimate, {
+                duration: isMobile ? 0.6 : 1,
+                stagger: { each: isMobile ? 0.01 : 0.02, from: "random" },
+                ease: "power2",
+                y: (x) => (x + 2) * (isMobile ? 200 : 400),
+            }, "");
+         }
+     });
+
+    // Sur mobile, skip l'animation d'image ou la simplifier
+    const imageScalingHero = document.querySelector(".image-scaling-hero");
+    if (isMobile) {
+        if (imageScalingHero) {
+           tl.set(imageScalingHero, { scale: 1, rotate: 0 });
+        }
+        if (imgScalingHeroContent.length > 0) {
+           tl.set(imgScalingHeroContent, { scale: 1 });
+        }
+    } else {
+        if (imageScalingHero) {
+           tl.to(imageScalingHero, {
+               scale: 1, rotate: 0, duration: 0.5,
+           }, "-=1");
+        }
+        if (imgScalingHeroContent.length > 0) {
+           tl.to(imgScalingHeroContent, {
+               scale: 1, duration: 0.4, stagger: 0.2, ease: "power2.out",
+           }, "-=0.8");
+        }
+    }
+
+    if (document.querySelector(".svg-1")) {
+       tl.from(".svg-1", {
+           y: "100%", duration: isMobile ? 0.3 : 0.5, ease: "power2.out",
+       }, "<");
+    }
+};
+
+   const animateDescriptioSection = () => {
+      if (!title2 || !title2Chars) return;
+      destroyTimeline(rl);
+      rl = gsap.timeline()
+
+      rl.fromTo(title2Chars, {
+         opacity: 0.2,
+         transformOrigin: "50% 50%",
+         y: (x) => x % 2 ? -(x + 1) * 40 : (x + 1) * 40,
+         x: (x) => -(x + 1) * -130,
+         stagger: -20
+      }, {
+         opacity: 1,
+         x: 0,
+         y: 0,
+         ease: "power2.inOut",
+         duration: 1,
+         stagger: 0.05,
+         scrollTrigger: {
+            trigger: ".section-2",
+            start: "top 90%",
+            end: "+=800",
+            scrub: 1,
+            toggleActions: "play none none reverse"
+         }
+      });
+
+   }
+
+   const animateMainSvgPath = () => {
+      if (!document.querySelector(".svg-draw")) return;
+      il.from(".svg-draw", {
+         drawSVG: "0%",
+         duration: 0.5,
+         opacity: 1,
+         ease: "none",
+         scrollTrigger: {
+            trigger: "body",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1,
+            toggleActions: "play none none reverse"
+         }
+      }, "<")
+   }
+
+
+   const animateOnScrollSvg = () => {
+
+      const svgAnimatedScroll = document.querySelectorAll(".svg-animated-scroll");
+      svgAnimatedScroll.forEach((svg) => {
+
+         il.from(svg, {
+            y: "200",
+            scale: 0.4,
+            duration: 0.8,
+            ease: "back.out(0.2,0.1)",
+            transformOrigin: "50% 50%",
+            scrollTrigger: {
+               trigger: svg,
+               start: "top 60%",
+               end: "+=100",
+               scrub: 1,
+               toggleActions: "play none none reverse"
+            }
+         })
+      })
+
+   }
+
+   const animateOnScrollSvgCloud = () => {
+
+      const svgAnimatedScroll = document.querySelectorAll(".svg-animated-scroll-cloud");
+      svgAnimatedScroll.forEach((svg) => {
+
+         il.fromTo(svg, {
+            x: -40,
+         }, {
+            x: 20,
+            duration: 0.8,
+            ease: "sine.out",
+            transformOrigin: "50% 50%",
+            repeat: -1,
+            yoyo: true,
+
+         })
+      })
+
+   }
+
+
+   const animatedSvgLastSection = () => {
+      mm.add({
+         isDesktop: "(min-width: 801px)",
+         isMobile: "(max-width: 800px)"
+      }, (context) => {
+         let { isDesktop } = context.conditions;
+
+         const lastText = document.querySelector(".last-text");
+         if (!lastText) return;
+
+         const textChars = new SplitText(lastText, { type: "words" }).words;
+         if (!textChars) return;
+
+         gsap.set(textChars, { autoAlpha: 0, y: "140%" });
+
+         yl = gsap.timeline({
+            scrollTrigger: {
+               trigger: ".last-section",
+               start: "top 50%",
+               end: "+=350",
+               pin: true,
+               scrub: true
+            }
+         })
+
+         if (!document.querySelector("#svg-animated-start") || !document.querySelector("#svg-animated-end")) return;
+
+         MorphSVGPlugin.convertToPath("#svg-animated-start, #svg-animated-end");
+         gsap.set(["#svg-animated-end"], { autoAlpha: 0 });
+
+         yl.to("#svg-animated-start", {
+            morphSVG: "#svg-animated-end",
+            duration: 1
+         }).to(".svg-animated", {
+            scale: 10,
+            ease: "power4.inOut",
+            duration: 3,
+            transformOrigin: "center center",
+
+         }, "<")
+
+
+         yl.to(textChars, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 3,
+            ease: "sine",
+            stagger: {
+               each: 0.1,
+               from: "start"
+            }
+         }, ">");
+      });
+   }
+
+   const animateCardOnScroll = () => {
+      const cardExplanationWrapper = document.querySelectorAll(".card-explanation-wrapper");
+      const cardExplanationUnder = document.querySelectorAll(".card-explanation-under");
+
+      cardExplanationWrapper.forEach((card) => {
+         const cardExplanation = card.querySelector(".card-explanation");
+
+         zl = gsap.timeline({
+            scrollTrigger: {
+               trigger: card,
+               start: "top 80%",
+               end: "+=100",
+               toggleActions: "play none none none"
+            }
+         });
+
+         zl.from(card, {
+            scale: 0,
+            opacity: 0,
+            duration: 0.3,
+            ease: "sine.out",
+         })
+            .from(cardExplanation, {
+               scale: 0.5,
+               delay: 0.2,
+               duration: 0.3,
+               ease: "sine",
+            }, "<");
+      });
+
+      cardExplanationUnder.forEach((item) => {
+         gsap.from(item, {
+            opacity: 0,
+            rotate: -15,
+            scrollTrigger: {
+               trigger: item,
+               start: "top 60%",
+               end: "+=100",
+               scrub: 1,
+            },
+         });
+      });
+   };
+
+
+
+
+
+   let isTransitioning = false;
+
+   function pageLeave(href) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      lenis.stop();
+      const nextPage = document.createElement("iframe");
+      nextPage.src = href;
+      nextPage.style.cssText = `
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(100%);
+  `;
+      document.body.appendChild(nextPage);
+
+      nextPage.addEventListener("load", () => {
+
+         nextPage.style.opacity = "1";
+
+         const tlLeave = gsap.timeline({
+            onComplete: () => {
+               setTimeout(() => {
+                  window.location.href = href;
+               }, 500)
+            }
+         });
+
+         tlLeave.to(".container-wrapper", {
+            scale: 0.85,
+            y: -60,
+            transformOrigin: "50% top",
+            duration: 0.6,
+            ease: "power2.inOut",
+         });
+
+         tlLeave.fromTo(nextPage, {
+            y: "100%",
+            scale: 0.9,
+            borderRadius: "20px"
+         }, {
+            y: "0%",
+            scale: 1,
+            borderRadius: "0px",
+            duration: 0.6,
+            ease: "power2.inOut",
+         }, "<");
+      });
+   }
+
+   function initTransitions() {
+      document.querySelectorAll("a[href]").forEach(link => {
+         const href = link.getAttribute("href");
+         if (href.startsWith("http") || href.startsWith("#")) return;
+
+         link.addEventListener("click", (e) => {
+            e.preventDefault();
+            pageLeave(href);
+         });
+      });
+   }
+
+
+   if (document.fonts) {
+      document.fonts.ready.then(() => {
+         initHeroSectionAnimation();
+         animateDescriptioSection();
+         animateMainSvgPath();
+         animateOnScrollSvg();
+         animateOnScrollSvgCloud();
+         animateCardOnScroll();
+         animatedSvgLastSection();
+      });
+   } else {
+      // Fallback si document.fonts n'est pas supporté
+      initHeroSectionAnimation();
+      animateDescriptioSection();
+      animateMainSvgPath();
+      animateOnScrollSvg();
+      animateOnScrollSvgCloud();
+      animateCardOnScroll();
+      animatedSvgLastSection();
+   }
+
+
+
+   initTransitions();
+
+});

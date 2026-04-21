@@ -1,0 +1,167 @@
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    ::before,
+    ::after {
+        animation-delay: -1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        background-attachment: initial !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+    }
+}
+
+@font-face {
+    font-family: "korosu";
+    src: url("./font/Saprona-Medium.ttf");
+    font-weight: 400;
+    font-display: block;
+}
+
+@font-face {
+    font-family: "korosu";
+    src: url("./font/Saprona-Light.ttf");
+    font-weight: 300;
+    font-display: block;
+}
+
+/* ── Base ── */
+html,
+body {
+    overflow-x: hidden;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+html {
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Typography (Tailwind override) ── */
+p,
+button,
+span {
+    font-family: "korosu";
+    font-weight: 400;
+}
+
+h2,
+h3,
+h4,
+h5,
+.title-1,
+h6 {
+    font-family: "korosu";
+    font-weight: 580;
+}
+
+/* ──────────────────────────────────────────
+   SVG — traits en orange
+   ────────────────────────────────────────── */
+
+/* Trait principal animé par DrawSVG */
+.svg-draw path,
+.svg-draw line,
+.svg-draw polyline,
+.svg-draw rect,
+.svg-draw circle,
+.svg-draw ellipse {
+    stroke: #f97316; /* orange-500 Tailwind */
+    fill: none;
+}
+
+/* SVG décoratifs scroll */
+.svg-animated-scroll path,
+.svg-animated-scroll line,
+.svg-animated-scroll polyline,
+.svg-animated-scroll rect,
+.svg-animated-scroll circle,
+.svg-animated-scroll ellipse {
+    stroke: #f97316;
+    fill: none;
+}
+
+/* SVG nuages */
+.svg-animated-scroll-cloud path,
+.svg-animated-scroll-cloud line,
+.svg-animated-scroll-cloud polyline,
+.svg-animated-scroll-cloud rect,
+.svg-animated-scroll-cloud circle,
+.svg-animated-scroll-cloud ellipse {
+    stroke: #f97316;
+    fill: none;
+}
+
+/* SVG hero (classe .svg-1) */
+.svg-1 path,
+.svg-1 line,
+.svg-1 polyline,
+.svg-1 rect,
+.svg-1 circle,
+.svg-1 ellipse {
+    stroke: #f97316;
+    fill: none;
+}
+
+/* SVG last section morph */
+.svg-animated path,
+.svg-animated line,
+.svg-animated polyline,
+.svg-animated rect,
+.svg-animated circle,
+.svg-animated ellipse {
+    stroke: #f97316;
+    fill: none;
+}
+
+/* Si certains SVG utilisent fill au lieu de stroke */
+.svg-draw [fill]:not([fill="none"]),
+.svg-animated [fill]:not([fill="none"]) {
+    fill: #f97316;
+}
+
+/* ── Responsive ── */
+@media (max-width: 800px) {
+    .image-scaling-hero {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .title-1 {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .caracter-title div {
+        mix-blend-mode: exclusion;
+    }
+
+    .reveal-slide {
+        will-change: contents;
+    }
+
+    .slide-card {
+        clip-path: inset(45% 42% 34% 41%);
+    }
+
+    .card > img {
+        transition: all 0.5s ease;
+    }
+
+    .card:hover img {
+        scale: 1.04;
+    }
+
+    .svg-bg {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+}
